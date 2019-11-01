@@ -10,6 +10,7 @@ import android.content.Intent
 import android.support.v7.app.AlertDialog
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.util.Log
 
 const val EXTRA_TASK = "jp.techacademy.hirotaka.iwasaki.taskapp.TASK"
 
@@ -89,11 +90,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         reloadListView()
+
+        search_button.setOnClickListener { view -> // 検索をかけたときの対応
+            val search_text = search_text.text.toString()
+            reloadListView(search_text)
+        }
     }
 
-    private fun reloadListView() {
+    //private fun reloadListView() {
+    private fun reloadListView(search_text: String = "") {
         // Realmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
-        val taskRealmResults = mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+        //val taskRealmResults = mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+        var taskRealmResults = mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+
+        if (search_text == "") { // 何も入っていなければ、何もしない
+            //Log.d("test191101n01", "search_textに何も入っていない")
+        } else {
+            //Log.d("test191101n01", search_text)
+            taskRealmResults = mRealm.where(Task::class.java).equalTo("category", search_text).findAll().sort("date", Sort.DESCENDING)
+        }
 
         // 上記の結果を、TaskList としてセットする
         mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
